@@ -5,9 +5,8 @@ import math
 from collections import Counter
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import plot_confusion_matrix, confusion_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
 
 sns.set()
@@ -254,8 +253,14 @@ def dtree_predict(data, length, weight):
     X_train, X_test, y_train, y_test = train_test_split(X, y_t, random_state=42, test_size=0.33)
     X_p_train, X_p_test, y_p_train, y_p_test = train_test_split(X, y_p, random_state=42, test_size=0.33)
 
+    # Tried to prune the tree as much as possible but max result is around 65% certainty
+    # Removed highest node value and plotted alpha results to get the highest value. Optimal results differs in
+    # male/female datasets so this one is optimized for men.
+
+    # Fitting for t-shirt
     clf_dt_pruned_t = DecisionTreeClassifier(random_state=42, ccp_alpha=0.0013)
     clf_dt_pruned_t = clf_dt_pruned_t.fit(X_train, y_train)
+    # Fitting for pant size
     clf_dt_pruned_p = DecisionTreeClassifier(random_state=42, ccp_alpha=0.0009)
     clf_dt_pruned_p = clf_dt_pruned_p.fit(X_p_train, y_p_train)
 
@@ -268,6 +273,10 @@ def dtree_predict(data, length, weight):
           f'{predicted_t} with a confidence of {round(score_t, 2)}%')
     print(f'DecisionTreeClassifier predicted you should wear pant size: '
           f'{predicted_p} with a confidence of {round(score_p, 2)}%')
+
+    # The difference in outcome can be due to the decision tree counts in the anomalies that KNN filters away.
+    # If you have 10 neighbours with size small and one medium your KNN outcome will be size small.
+    # But in a decision tree the medium size can be the top pick.
 
 
 def main():
